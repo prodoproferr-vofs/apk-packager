@@ -1,63 +1,48 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MEU GERADOR APK</title>
-  <style>
-    body{font-family:system-ui;background:#1a1a2e;color:white;text-align:center;padding:20px;background:linear-gradient(135deg,#16222a,#3a6073)}
-    h1{font-size:2.5em;margin:10px}
-    input,button{padding:15px;margin:10px;width:90%;max-width:400px;border:none;border-radius:12px;font-size:18px}
-    button{background:#00d4aa;color:#000;font-weight:bold}
-    #status{margin:30px;font-size:19px}
-    .download{background:#00ffaa;color:#000;padding:15px 30px;border-radius:12px;text-decoration:none;display:inline-block;margin:10px}
-  </style>
+  <title>Gerador de APK Web2App</title>
 </head>
 <body>
-  <h1>MEU GERADOR APK</h1>
-  <p>Seu próprio gerador 100% grátis e sem terceiros</p>
-  
-  <input type="url" id="url" placeholder="https://seusite.com" required>
-  <input type="text" id="nome" placeholder="Nome do App" required>
-  <input type="file" id="icon" accept="image/*">
-  <br>
-  <button onclick="gerar()">GERAR APK AGORA</button>
-  <div id="status"></div>
 
-  <script>
-    async function gerar() {
-      const url = document.getElementById('url').value;
-      const nome = document.getElementById('nome').value;
-      const icon = document.getElementById('icon').files[0];
-      const status = document.getElementById('status');
-      
-      if (!url || !nome) return status.innerHTML = "Preencha tudo!";
-      
-      status.innerHTML = "Enviando pro seu GitHub... aguarde 40-60 segundos ⏳";
-      
-      const form = new FormData();
-      form.append('url', url);
-      form.append('nome', nome);
-      if (icon) form.append('icon', icon);
-      
-      const res = await fetch('https://api.github.com/repos/SEUUSUARIO/meu-gerador-apk/dispatches', {
-        method: 'POST',
-        headers: { Authorization: 'token COLOQUE_SEU_TOKEN_AQUI', Accept: 'application/vnd.github.v3+json' },
-        body: JSON.stringify({ event_type: 'gerar-apk', client_payload: { url, nome, icon: icon ? await toBase64(icon) : null } })
-      });
-      
-      if (res.ok) {
-        status.innerHTML = "APK sendo gerado! Volte em 1 minuto e atualize a página.<br>Aqui vai aparecer o link direto do download.";
-      }
-    }
-    function toBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-  </script>
+<h2>Gerar APK a partir de site/blog</h2>
+
+<form id="apkForm" enctype="multipart/form-data">
+  <label>URL do site:</label><br>
+  <input type="text" name="url" required><br><br>
+
+  <label>Nome do App:</label><br>
+  <input type="text" name="appName" required><br><br>
+
+  <label>Ícone do App (PNG 512x512):</label><br>
+  <input type="file" name="icon" accept="image/png" required><br><br>
+
+  <button type="submit">Gerar APK</button>
+</form>
+
+<p id="status"></p>
+
+<script>
+document.getElementById("apkForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  document.getElementById("status").innerText = "Gerando APK...";
+
+  const response = await fetch("https://SEU-ENDEREÇO-RENDER.onrender.com/build", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    document.getElementById("status").innerHTML =
+      `<a href="${data.downloadUrl}">Baixar APK pronto</a>`;
+  } else {
+    document.getElementById("status").innerText = "Erro: " + data.error;
+  }
+};
+</script>
+
 </body>
 </html>
