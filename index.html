@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gerador de APK Web2App</title>
+</head>
+<body>
+
+<h2>Gerar APK a partir de site/blog</h2>
+
+<form id="apkForm" enctype="multipart/form-data">
+  <label>URL do site:</label><br>
+  <input type="text" name="url" required><br><br>
+
+  <label>Nome do App:</label><br>
+  <input type="text" name="appName" required><br><br>
+
+  <label>Ícone do App (PNG 512x512):</label><br>
+  <input type="file" name="icon" accept="image/png" required><br><br>
+
+  <button type="submit">Gerar APK</button>
+</form>
+
+<p id="status"></p>
+
+<script>
+document.getElementById("apkForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  document.getElementById("status").innerText = "Gerando APK...";
+
+  const response = await fetch("https://SEU-ENDEREÇO-RENDER.onrender.com/build", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    document.getElementById("status").innerHTML =
+      `<a href="${data.downloadUrl}">Baixar APK pronto</a>`;
+  } else {
+    document.getElementById("status").innerText = "Erro: " + data.error;
+  }
+};
+</script>
+
+</body>
+  </html>
